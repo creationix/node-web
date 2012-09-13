@@ -1,4 +1,4 @@
-var middle = require('middle');
+var middle = require('./middle');
 var fs = require('fs');
 
 function app(req, res) {
@@ -37,7 +37,7 @@ app = middle.autoHeaders(app);
 
 app = middle.log(app);
 
-var server = require('net').createServer(require('web').socketHandler(app));
+var server = require('net').createServer(require('./web').socketHandler(app));
 server.listen(8080, function () {
   var address = server.address();
   console.log("http://%s:%s/", address.address, address.port);

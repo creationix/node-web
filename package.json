@@ -1,0 +1,17 @@
+{
+  "name": "web",
+  "version": "0.0.0",
+  "description": "A small and fast web/http library for nodejs. (replaces the built-in http module)",
+  "main": "web.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/creationix/node-web.git"
+  },
+  "author": "Tim Caswell",
+  "license": "MIT"
+}
