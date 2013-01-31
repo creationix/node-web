@@ -51,9 +51,9 @@ Second, it's not bound to the `net` module anymore.  I believe that parsing HTTP
 ```js
 var app = function (request, respond) {
   // request.method is "GET", "POST", "PUT", etc..
-  // request.url is { pathname: "/foo/bar", query: "and=stuff" ...}
-  // request is still the request stream, but I'm thinking of moving
-  // it to a .body property.
+  // request.url is the raw request path "/foo/bar?and=stuff"
+  // request.headers is the raw array of request headers.
+  // request.body is the request body as a stream.
 
   // respond(code, headers, body) is a function
   // body can be a string or a writable stream.
@@ -109,4 +109,83 @@ app = logger(app);
 
 As you can see, there are places to do logic at several steps in a request and server lifetime.
 
+
+## Request Object
+
+The request object contains the following properties.
+
+### req.method
+
+This is the HTTP method in the request.  It can have values like "GET", "POST", "PUT", "DELETE", and any other value the node http parser supports.
+
+
+### req.headers
+
+This is a hash of the headers with keys lowercases for easy access.
+
+It can be used as:
+
+```js
+if (req.headers["content-type"] === "application/json") { ... }
+```
+
+### req.url
+
+This is the result of node's url.parse on the http request url.
+`req.url.path` contains the original raw string if desired.
+`req.url.pathname` is the path alone without query strings.
+
+### req.versionMajor, req.versionMinor
+
+These two properties tell you the version of the http request.  They are usually either (1, 0) or (1, 1) for HTTP 1.0 and HTTP 1.1.
+
+### req.shouldKeepAlive
+
+This is a hint set by node's http parser to tell the middleware if it should
+keepalive the connection.
+
+### req.upgrade
+
+This is another hint set by node's http parser.  It's true for upgrade request like websocket connections.
+
+
+### req.body
+
+This property is set by the web library.  It's a readable node stream for the request body.
+
+### req.rawHeaders
+
+This is a raw array of alternating key/value pairs.  For example, the headers from a curl request look like:
+
+```js
+req.rawHeaders = [
+  'User-Agent', 'curl/7.26.0',
+  'Host',       'localhost:8080',
+  'Accept',     '*/*' ]
+```
+
+## Post response processing.
+
+The built-in response function does a bit of post-processing after your app is
+done to help your app be a proper http server.  These post-processing filters can be configured in the socketHandler function's options argument.
+
+### options.autoDate = true
+
+This options adds a `Date` header with the current date as required by the HTTP spec if your response does not have a `Date` header.
+
+### options.autoServer = "node.js " + process.version
+
+Adds a `Server` header with the running version of node if you don't have a `Server` header.  Set to some falsy value to disable or set to a new string to replace.
+
+### options.autoContentLength = true
+
+If your body is a known size (not streaming) and you leave out the `Content-Length` header, this will add one for you.
+
+### options.autoChunked = true
+
+If you leave out a `Content-Length` header and your body is streaming, it will replace your stream with a chunked encoded stream and set the proper `Transfer-Encoding: chunked` header for you.
+
+### options.autoConnection = true
+
+This will try to detect what the `Connection` header should be.  Usually either `close` or `keep-alive`.  Also it will update `req.shouldKeepAlive` which controls the tcp level connection behavior.
 
