@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A small and fast web/http library for nodejs. (replaces the built-in http module)",
   "main": "web.js",
   "dependencies": {},
