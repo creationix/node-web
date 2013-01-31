@@ -68,3 +68,45 @@ var server = require('net').createServer(handler);
 server.listen(8080);
 ```
 
+## Built-in Middleware System
+
+Unlike the `http` module, `web` makes it trivial to stack app layers.  There is no need for a library because all that's needed is a simple function.  Any function that implements the `(request, respond)` interface is a valid web application.
+
+### Basic Logger Layer
+
+Suppose you wanted to add a layer that logged all request and the response code the app gave them.
+
+This can be done simple as:
+
+```js
+function logger(app) {
+  // Any per-layer startup logic would go here.
+  // We only need the app closure reference, so there is nothing else to do
+
+  return function(req, res) {
+
+    // Per request logic during the inward path would go here.  Since
+    // we want to wait till the response code is generated, there is nothing
+    // to do.
+
+    // Forward to the next layer inward.
+    app(req, function (code, headers, body) {
+
+      // Here we've intercepted the response function and can do stuff on the
+      // way back out of the layers.  We want to log the request and response.
+
+      console.log(req.method + " " + req.url.path + " " + code);
+
+      // Forward to the layers outward.
+      res(code, headers, body);
+    });
+  };
+}
+
+// Then to use this layer, we just wrap out app.
+app = logger(app);
+```
+
+As you can see, there are places to do logic at several steps in a request and server lifetime.
+
+
