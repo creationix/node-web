@@ -78,15 +78,15 @@ exports.socketHandler = function (app) {
         head += "\r\n";
 
         var isStreaming = body && typeof body === "object" && typeof body.pipe === "function";
-        
+
         if (body && !isStreaming) head += body;
-        
+
         client.write(head);
-        
+
         if (!isStreaming) {
           return done()
         }
-        
+
         body.pipe(client);
         body.on("end", done);
 
@@ -105,13 +105,12 @@ exports.socketHandler = function (app) {
       var ret = parser.execute(chunk, 0, chunk.length);
       // TODO: handle error cases in ret
     });
-    
+
     client.on("end", function () {
       parser.finish();
     });
-    
+
     function done() {
-      console.log(req);
       if (req.shouldKeepAlive) {
         parser.reinitialize(HTTPParser.REQUEST);
       }
