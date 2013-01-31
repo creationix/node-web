@@ -169,6 +169,15 @@ req.rawHeaders = [
 The built-in response function does a bit of post-processing after your app is
 done to help your app be a proper http server.  These post-processing filters can be configured in the socketHandler function's options argument.
 
+For example, suppose you don't want to send the full nodejs version string because of some security requirements.  Simple override the `autoServer` when creating the socket handler.
+
+```js
+var handler = require('web').socketHandler(app, {
+  autoServer: "node.js"
+});
+//...
+```
+
 ### options.autoDate = true
 
 This options adds a `Date` header with the current date as required by the HTTP spec if your response does not have a `Date` header.
