@@ -151,12 +151,11 @@ function socketHandler(app, options) {
       client.write(head);
 
       if (!isStreaming) {
-        return done()
+        return done();
       }
 
       body.pipe(client);
       body.on("end", done);
-
     }
 
     function done() {
