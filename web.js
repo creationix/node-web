@@ -1,8 +1,9 @@
 var HTTPParser = process.binding("http_parser").HTTPParser;
 var Stream = require('stream').Stream;
 var urlParse = require('url').parse;
+var web = module.exports;
 
-var STATUS_CODES = {
+var STATUS_CODES = web.STATUS_CODES = {
   '100': 'Continue',
   '101': 'Switching Protocols',
   '102': 'Processing',                 // RFC 2518, obsoleted by RFC 4918
@@ -64,7 +65,9 @@ var defaults = {
   autoChunked: true,
   autoConnection: true,
 };
-exports.socketHandler = function (app, options) {
+
+web.socketHandler = socketHandler;
+function socketHandler(app, options) {
   // Mix the options with the default config.
   var config = Object.create(defaults);
   for (var key in options) {
@@ -76,7 +79,6 @@ exports.socketHandler = function (app, options) {
     var req;
 
     function res(statusCode, headers, body) {
-
       var hasContentLength, hasTransferEncoding, hasDate, hasServer;
       for (var key in headers) {
         switch (key.toLowerCase()) {
