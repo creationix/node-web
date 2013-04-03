@@ -113,10 +113,10 @@ function socketHandler(app, options) {
               body.emit("data", chunk.length.toString(16).toUpperCase() + "\r\n");
               body.emit("data", chunk);
               body.emit("data", "\r\n");
-              return;
+            } else {
+              var length = Buffer.byteLength(chunk);
+              body.emit("data", length.toString(16).toUpperCase() + "\r\n" + chunk + "\r\n");
             }
-            var length = Buffer.byteLength(chunk);
-            body.emit("data", toString(16).toUpperCase() + "\r\n" + chunk + "\r\n");
           });
 
           originalBody.on("end", function () {
