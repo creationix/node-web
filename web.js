@@ -50,8 +50,8 @@ var STATUS_CODES = web.STATUS_CODES = {
   '501': 'Not Implemented',
   '502': 'Bad Gateway',
   '503': 'Service Unavailable',
-  '504': 'Gateway Time-out',
-  '505': 'HTTP Version not supported',
+  '504': 'Gateway Timeout',
+  '505': 'HTTP Version Not Supported',
   '506': 'Variant Also Negotiates',    // RFC 2295
   '507': 'Insufficient Storage',       // RFC 4918
   '509': 'Bandwidth Limit Exceeded',
