@@ -1,8 +1,9 @@
 var HTTPParser = process.binding("http_parser").HTTPParser;
 var Stream = require('stream').Stream;
 var urlParse = require('url').parse;
+var web = module.exports;
 
-var STATUS_CODES = {
+var STATUS_CODES = web.STATUS_CODES = {
   '100': 'Continue',
   '101': 'Switching Protocols',
   '102': 'Processing',                 // RFC 2518, obsoleted by RFC 4918
@@ -49,8 +50,8 @@ var STATUS_CODES = {
   '501': 'Not Implemented',
   '502': 'Bad Gateway',
   '503': 'Service Unavailable',
-  '504': 'Gateway Time-out',
-  '505': 'HTTP Version not supported',
+  '504': 'Gateway Timeout',
+  '505': 'HTTP Version Not Supported',
   '506': 'Variant Also Negotiates',    // RFC 2295
   '507': 'Insufficient Storage',       // RFC 4918
   '509': 'Bandwidth Limit Exceeded',
@@ -64,7 +65,9 @@ var defaults = {
   autoChunked: true,
   autoConnection: true,
 };
-exports.socketHandler = function (app, options) {
+
+web.socketHandler = socketHandler;
+function socketHandler(app, options) {
   // Mix the options with the default config.
   var config = Object.create(defaults);
   for (var key in options) {
@@ -76,7 +79,6 @@ exports.socketHandler = function (app, options) {
     var req;
 
     function res(statusCode, headers, body) {
-
       var hasContentLength, hasTransferEncoding, hasDate, hasServer;
       for (var key in headers) {
         switch (key.toLowerCase()) {
@@ -111,10 +113,10 @@ exports.socketHandler = function (app, options) {
               body.emit("data", chunk.length.toString(16).toUpperCase() + "\r\n");
               body.emit("data", chunk);
               body.emit("data", "\r\n");
-              return;
+            } else {
+              var length = Buffer.byteLength(chunk);
+              body.emit("data", length.toString(16).toUpperCase() + "\r\n" + chunk + "\r\n");
             }
-            var length = Buffer.byteLength(chunk);
-            body.emit("data", toString(16).toUpperCase() + "\r\n" + chunk + "\r\n");
           });
 
           originalBody.on("end", function () {
@@ -149,12 +151,11 @@ exports.socketHandler = function (app, options) {
       client.write(head);
 
       if (!isStreaming) {
-        return done()
+        return done();
       }
 
       body.pipe(client);
       body.on("end", done);
-
     }
 
     function done() {
