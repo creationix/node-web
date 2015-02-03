@@ -114,7 +114,7 @@ exports.socketHandler = function (app, options) {
               return;
             }
             var length = Buffer.byteLength(chunk);
-            body.emit("data", toString(16).toUpperCase() + "\r\n" + chunk + "\r\n");
+            body.emit("data", length.toString(16).toUpperCase() + "\r\n" + chunk + "\r\n");
           });
 
           originalBody.on("end", function () {
@@ -180,7 +180,7 @@ exports.socketHandler = function (app, options) {
     }
 
     parser.onBody = function (buf, start, len) {
-      req.body.emit("data", buf.slide(start, len));
+      req.body.emit("data", buf.slice(start, len));
     };
 
     parser.onMessageComplete = function () {
