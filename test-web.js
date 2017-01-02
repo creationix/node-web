@@ -9,7 +9,8 @@ function app(req, res) {
 }
 
 
-var server = require('net').createServer(require('./web').socketHandler(app));
+var server = require('net').createServer(), web = require('./web');
+server.on('connection', web.socketHandler(app, { debug: true }));
 server.listen(8080, function () {
   var address = server.address();
   console.log("http://%s:%s/", address.address, address.port);
