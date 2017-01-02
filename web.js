@@ -64,9 +64,10 @@ var defaults = {
   autoChunked: true,
   autoConnection: true,
 };
+function noop() { return; }
 exports.socketHandler = function (app, options) {
   // Mix the options with the default config.
-  var config = Object.create(defaults);
+  var config = Object.create(defaults), debugLv = options.debug, clientNum = 0;
   for (var key in options) {
     config[key] = options[key];
   }
@@ -74,9 +75,14 @@ exports.socketHandler = function (app, options) {
   return function (client) {
     var parser = new HTTPParser(HTTPParser.REQUEST);
     var req;
+    var debugLog = (debugLv
+      ? console.log.bind(console, 'client#', clientNum)
+      : noop);
+    clientNum += 1;
+    debugLog('connection from', client.remoteAddress);
 
     function res(statusCode, headers, body) {
-
+      debugLog('res:', arguments);
       var hasContentLength, hasTransferEncoding, hasDate, hasServer;
       for (var key in headers) {
         switch (key.toLowerCase()) {
@@ -159,14 +165,15 @@ exports.socketHandler = function (app, options) {
 
     function done() {
       if (req.shouldKeepAlive) {
-        parser.reinitialize(HTTPParser.REQUEST);
+        debugLog('request done, re-init');
+        return parser.reinitialize(HTTPParser.REQUEST);
       }
-      else {
-        client.end();
-      }
+      debugLog('request done, disconnect');
+      return client.end();
     }
 
     parser.onHeadersComplete = function (info) {
+      debugLog('header complete');
       info.body = new Stream();
       info.body.readable = true;
       req = info;
@@ -188,11 +195,13 @@ exports.socketHandler = function (app, options) {
     };
 
     client.on("data", function (chunk) {
+      debugLog('chunk:', chunk.length, JSON.stringify(String(chunk)));
       var ret = parser.execute(chunk, 0, chunk.length);
       // TODO: handle error cases in ret
     });
 
     client.on("end", function () {
+      debugLog('end');
       parser.finish();
     });
 
